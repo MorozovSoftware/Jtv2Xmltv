@@ -62,48 +62,5 @@ namespace Jtv2Xmltv.Core.Jtv
             
             return guide;
         }
-
-        /// <summary>
-        /// Deprecated
-        /// </summary>
-        /// <param name="languageAttribute"></param>
-        /// <param name="timeOffsetAttribute"></param>
-        /// <param name="renameChannelsMap"></param>
-        internal void CreateXmltv(string languageAttribute, string timeOffsetAttribute, Dictionary<string, string> renameChannelsMap)
-        {
-            XDocument xmltv = new();
-            XElement tvXml = new("tv");
-            List<XElement> programsXml = new(channels.Count);
-
-            int channelId = 1;
-
-            foreach (KeyValuePair<string, RawJtvChannel> channel in channels)
-            {
-                tvXml.Add(new XElement("channel",
-                    new XAttribute("id", channelId),
-                    new XElement("display-name",
-                        new XAttribute("lang", languageAttribute),
-                        DictionaryTools.GetReplacedOrDefault(channel.Key, renameChannelsMap))));
-
-                programsXml.AddRange(channel.Value.GetProgramsXML(channelId, languageAttribute, timeOffsetAttribute));
-
-                channelId++;
-            }
-
-            tvXml.Add(programsXml);
-
-            xmltv.Add(tvXml);
-            xmltv.Save("xmltv.xml");
-        }
-        /// <summary>
-        /// Deprecated
-        /// </summary>
-        /// <param name="languageAttribute"></param>
-        /// <param name="timeOffsetAttribute"></param>
-        internal void CreateXmltv(string languageAttribute, string timeOffsetAttribute)
-        {
-            CreateXmltv(languageAttribute, timeOffsetAttribute, new Dictionary<string, string>());
-        }
-
     }
 }

@@ -46,36 +46,5 @@ namespace Jtv2Xmltv.Core.Jtv
                 RecordOffset += countOfCharsBytes.Length + nameBytes.Length;
             }
         }
-        /// <summary>
-        /// Deprecated
-        /// </summary>
-        /// <param name="channelId"></param>
-        /// <param name="languageAttribute"></param>
-        /// <param name="timeOffsetAttribute"></param>
-        /// <returns></returns>
-        internal List<XElement> GetProgramsXML(int channelId, string languageAttribute, string timeOffsetAttribute)
-        {
-            List<XElement> programsXML = new(programs.Count);
-            XElement programme = null;
-
-            foreach (KeyValuePair<ulong, int> program in programs)
-            {
-                var currentStartTime = $"{DateTime.FromFileTimeUtc((long)program.Key):yyyyMMddHHmmss} {timeOffsetAttribute}";
-
-                programme?.Attribute("stop").SetValue(currentStartTime);
-
-                programme = new XElement("programme",
-                    new XAttribute("start", currentStartTime),
-                    new XAttribute("stop", currentStartTime),
-                    new XAttribute("channel", channelId),
-                    new XElement("title",
-                        new XAttribute("lang", languageAttribute),
-                        programNames[program.Value]));
-
-                programsXML.Add(programme);
-            }
-
-            return programsXML;
-        }
     }
 }
