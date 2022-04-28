@@ -14,7 +14,7 @@ namespace Jtv2Xmltv
             JtvCoder jtv = new();
             XmltvCoder xmltv = new();
 
-            xmltv.Save(jtv.Open(jtvPath));
+            xmltv.Save(jtv.Open(jtvPath).SetStopTimeByNext());
 
 
 
