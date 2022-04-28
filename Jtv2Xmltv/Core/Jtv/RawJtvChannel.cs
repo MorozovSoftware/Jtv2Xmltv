@@ -5,14 +5,14 @@ using System.Text;
 using System.Xml.Linq;
 using UsefulTools;
 
-namespace Jtv2Xmltv.Core
+namespace Jtv2Xmltv.Core.Jtv
 {
-    internal class JtvChannel
+    internal class RawJtvChannel
     {
-        readonly Dictionary<ulong, int> programs = new();
-        readonly Dictionary<int, string> programNames = new();
+        public readonly Dictionary<ulong, int> programs = new();
+        public readonly Dictionary<int, string> programNames = new();
         
-        public void ReadNDX(Stream stream)
+        internal void ReadNDX(Stream stream)
         {
             byte[] countOfRecordsBytes = new byte[2];
             stream.Read(countOfRecordsBytes, 0, countOfRecordsBytes.Length);
@@ -27,7 +27,7 @@ namespace Jtv2Xmltv.Core
             }
         }
 
-        public void ReadPDT(Stream stream, Encoding encoding)
+        internal void ReadPDT(Stream stream, Encoding encoding)
         {
             byte[] formatHeader = new byte[26];
             stream.Read(formatHeader, 0, formatHeader.Length);
@@ -46,8 +46,14 @@ namespace Jtv2Xmltv.Core
                 RecordOffset += countOfCharsBytes.Length + nameBytes.Length;
             }
         }
-
-        public List<XElement> GetProgramsXML(int channelId, string languageAttribute, string timeOffsetAttribute)
+        /// <summary>
+        /// Deprecated
+        /// </summary>
+        /// <param name="channelId"></param>
+        /// <param name="languageAttribute"></param>
+        /// <param name="timeOffsetAttribute"></param>
+        /// <returns></returns>
+        internal List<XElement> GetProgramsXML(int channelId, string languageAttribute, string timeOffsetAttribute)
         {
             List<XElement> programsXML = new(programs.Count);
             XElement programme = null;

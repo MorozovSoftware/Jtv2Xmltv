@@ -1,17 +1,18 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
 using System.Xml.Linq;
 using UsefulTools;
 
-namespace Jtv2Xmltv.Core
+namespace Jtv2Xmltv.Core.Jtv
 {
-    public class JtvGuide
+    internal class RawJtvGuide
     {
-        readonly Dictionary<string, JtvChannel> channels = new();
+        readonly Dictionary<string, RawJtvChannel> channels = new();
 
-        public void OpenJtv(string filePath, Encoding zipEncoding, Encoding pdtEncoding)
+        internal void Open(string filePath, Encoding zipEncoding, Encoding pdtEncoding)
         {
             using (ZipArchive zipArchive = ZipFile.Open(filePath, ZipArchiveMode.Read, zipEncoding))
             {
@@ -35,8 +36,40 @@ namespace Jtv2Xmltv.Core
                 }
             }
         }
-        
-        public void CreateXmltv(string languageAttribute, string timeOffsetAttribute, Dictionary<string, string> renameChannelsMap)
+        public IGuide CreateGuide()
+        {
+            IGuide guide = new Guide();
+
+            foreach (KeyValuePair<string, RawJtvChannel> jtvChannel in channels)
+            {
+                IChannel channel = new Channel
+                {
+                    Name = jtvChannel.Key
+                };
+
+                foreach (KeyValuePair<ulong, int> program in jtvChannel.Value.programs)
+                {
+                    IProg prog = new Prog
+                    {
+                        StartTime = DateTime.FromFileTimeUtc((long)program.Key),
+                        Name = jtvChannel.Value.programNames[program.Value]
+                    };
+                    channel.AddProg(prog);
+                }
+
+                guide.AddChannel(channel);
+            }
+            
+            return guide;
+        }
+
+        /// <summary>
+        /// Deprecated
+        /// </summary>
+        /// <param name="languageAttribute"></param>
+        /// <param name="timeOffsetAttribute"></param>
+        /// <param name="renameChannelsMap"></param>
+        internal void CreateXmltv(string languageAttribute, string timeOffsetAttribute, Dictionary<string, string> renameChannelsMap)
         {
             XDocument xmltv = new();
             XElement tvXml = new("tv");
@@ -44,7 +77,7 @@ namespace Jtv2Xmltv.Core
 
             int channelId = 1;
 
-            foreach (KeyValuePair<string, JtvChannel> channel in channels)
+            foreach (KeyValuePair<string, RawJtvChannel> channel in channels)
             {
                 tvXml.Add(new XElement("channel",
                     new XAttribute("id", channelId),
@@ -62,8 +95,12 @@ namespace Jtv2Xmltv.Core
             xmltv.Add(tvXml);
             xmltv.Save("xmltv.xml");
         }
-
-        public void CreateXmltv(string languageAttribute, string timeOffsetAttribute)
+        /// <summary>
+        /// Deprecated
+        /// </summary>
+        /// <param name="languageAttribute"></param>
+        /// <param name="timeOffsetAttribute"></param>
+        internal void CreateXmltv(string languageAttribute, string timeOffsetAttribute)
         {
             CreateXmltv(languageAttribute, timeOffsetAttribute, new Dictionary<string, string>());
         }
